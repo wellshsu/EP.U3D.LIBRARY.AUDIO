@@ -7,6 +7,7 @@
 // of this license document, but changing it is not allowed.           //
 //                  SEE LICENSE.md FOR MORE DETAILS.                   //
 //---------------------------------------------------------------------//
+using EP.U3D.LIBRARY.ASSET;
 using EP.U3D.LIBRARY.BASE;
 using UnityEngine;
 
@@ -19,33 +20,44 @@ namespace EP.U3D.LIBRARY.AUDIO
         private static bool mMuteSound = false;
         private static bool mMuteMusic = false;
 
-        public static void Initialize(GameObject controller)
+        public static void Initialize(Transform root, string path)
         {
-            if (controller)
+            GameObject audio = AssetManager.LoadAsset(path, typeof(GameObject)) as GameObject;
+            if (audio == null)
             {
-                GO = controller;
-                Listener = GO.GetComponent<AudioListener>();
-                if (Listener == null) Helper.LogError("missing AudioListener on AudioController go.");
+                Helper.LogError("load audiocontroller error at path {0}", path);
             }
             else
             {
-                Helper.LogError("error caused by nil AudioController go.");
-            }
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (a1, a2) =>
-            {
-                var roots = a1.GetRootGameObjects();
-                var has = false;
-                foreach (var v in roots)
+                audio = Object.Instantiate(audio);
+                if (audio == null)
                 {
-                    var comp = v.GetComponentInChildren<AudioListener>(true);
-                    if (comp)
-                    {
-                        has = true;
-                        break;
-                    }
+                    Helper.LogError("instantiate audiocontroller error at path {0}", path);
                 }
-                Listener.enabled = !has;
-            };
+                else
+                {
+                    audio.name = "Audio";
+                    audio.transform.parent = root;
+                    GO = audio;
+                    Listener = GO.GetComponent<AudioListener>();
+                    if (Listener == null) Helper.LogWarning("missing AudioListener on AudioController go.");
+                    UnityEngine.SceneManagement.SceneManager.sceneLoaded += (a1, a2) =>
+                    {
+                        var roots = a1.GetRootGameObjects();
+                        var has = false;
+                        foreach (var v in roots)
+                        {
+                            var comp = v.GetComponentInChildren<AudioListener>(true);
+                            if (comp)
+                            {
+                                has = true;
+                                break;
+                            }
+                        }
+                        if (Listener) Listener.enabled = !has;
+                    };
+                }
+            }
         }
 
         public static bool MuteSound

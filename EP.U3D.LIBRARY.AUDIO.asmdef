@@ -2,7 +2,8 @@
     "name": "EP.U3D.LIBRARY.AUDIO",
     "rootNamespace": "",
     "references": [
-        "EP.U3D.LIBRARY.BASE"
+        "EP.U3D.LIBRARY.BASE",
+        "EP.U3D.LIBRARY.ASSET"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
